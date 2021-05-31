@@ -123,7 +123,7 @@ public class PremierLeagueDAO {
 	}
 	
 	public List<Adiacenza> getArchi(Month m, Integer min, Map<Integer, Match> idMap){
-		final String sql = "SELECT m1.MatchID, m2.MatchID, COUNT(DISTINCT(a1.PlayerID)) AS peso "
+		final String sql = "SELECT m1.MatchID AS m1, m2.MatchID as m2, COUNT(DISTINCT(a1.PlayerID)) AS peso "
 				+ "FROM matches m1, matches m2, actions a1, actions a2 "
 				+ "WHERE m1.MatchID = a1.MatchID AND m2.MatchID = a2.MatchID AND a1.TimePlayed >= ? AND a2.PlayerID >= ? "
 				+ "AND m1.MatchID > m2.MatchID AND MONTH(m1.Date) = MONTH(m2.Date) AND MONTH(m1.Date) = ? AND a1.PlayerID = a2.PlayerID "
@@ -141,8 +141,8 @@ public class PremierLeagueDAO {
 			ResultSet rs = st.executeQuery();
 			
 			while(rs.next()) {
-				if(idMap.containsKey(rs.getInt("m1.MatchID")) && idMap.containsKey(rs.getInt("m2.MatchID"))){
-					Adiacenza a = new Adiacenza(idMap.get(rs.getInt("m2.MatchID")), idMap.get(rs.getInt("m2.MatchID")), rs.getInt("peso"));
+				if(idMap.containsKey(rs.getInt("m1")) && idMap.containsKey(rs.getInt("m2"))){
+					Adiacenza a = new Adiacenza(idMap.get(rs.getInt("m1")), idMap.get(rs.getInt("m2")), rs.getInt("peso"));
 					result.add(a);
 				}
 			}

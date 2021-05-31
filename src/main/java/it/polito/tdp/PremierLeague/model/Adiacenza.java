@@ -39,7 +39,7 @@ public class Adiacenza {
 
 	@Override
 	public String toString() {
-		return m1.matchID + "-" + m2.matchID + ": " + peso;
+		return m1.toString() + "-" + m2.toString() + ": " + peso;
 	}
 	
 	

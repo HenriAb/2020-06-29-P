@@ -54,6 +54,22 @@ public class FXMLController {
     @FXML
     void doConnessioneMassima(ActionEvent event) {
     	
+    	Integer min;
+    	Month mese = this.cmbMese.getValue();
+    	
+    	if(mese == null) {
+    		this.txtResult.setText("Errore! Selezionare il mese dal menù");
+    		return;
+    	}
+    	
+    	try {
+    		min = Integer.parseInt(this.txtMinuti.getText());
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.setText("Errore! Devi inserire un numero intero");
+    		return;
+    	}
+    	
+    	this.txtResult.appendText(this.model.getConnMax(mese, min));
     }
 
     @FXML
@@ -69,10 +85,10 @@ public class FXMLController {
     		return;
     	}
     	
-    	if(this.txtMinuti.getText() == null) {
-    		this.txtResult.setText("Errore, inserire il numero di minuti");
-    		return;
-    	}
+//    	if(this.txtMinuti.getText() == null) {
+//    		this.txtResult.setText("Errore, inserire il numero di minuti");
+//    		return;
+//    	}
     	
     	try {
     		min = Integer.parseInt(this.txtMinuti.getText());

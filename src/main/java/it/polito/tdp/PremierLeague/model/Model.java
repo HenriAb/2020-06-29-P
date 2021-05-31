@@ -50,25 +50,38 @@ public class Model {
 		return this.grafo.edgeSet().size();
 	}
 	
-	public Map<Adiacenza, Integer> getConnMax(Month m, Integer min){
+	public String getConnMax(Month m, Integer min){
 		
+		List<Adiacenza> result = new ArrayList<>();
 		Adiacenza best = null;
-		Integer max = Integer.MIN_VALUE;
+		Integer max = 0;//Integer.MIN_VALUE;
 		
-
-//		for(Adiacenza a1 : this.dao.getArchi(m, min, idMap)) {
-//			for(Adiacenza a2 : this.dao.getArchi(m, min, idMap)) {
-//				Integer numGiocatori = 0;
-//				if(!a1.equals(a2)) {
-//					numGiocatori += a1.getPeso() + a2.getPeso();
-//				}
-//			}
-//		}
 		Integer numGiocatori = 0;
-		for(Adiacenza a : this.dao.getArchi(m, min, idMap)) {
-			numGiocatori += a.getPeso();  
+		for(DefaultWeightedEdge e : this.grafo.edgeSet()) {
+			numGiocatori = (int) this.grafo.getEdgeWeight(e);
+			
+			if(numGiocatori > max) {
+				max = numGiocatori;
+				Match m1 = this.grafo.getEdgeSource(e);
+				Match m2 = this.grafo.getEdgeTarget(e);
+				best = new Adiacenza(m1, m2, max);
+			}	
 		}
-		return null;
+		
+		for(DefaultWeightedEdge e : this.grafo.edgeSet()) {
+			numGiocatori = (int) this.grafo.getEdgeWeight(e);
+			
+			if(this.grafo.getEdgeWeight(e) == max) {
+				result.add(new Adiacenza(this.grafo.getEdgeSource(e), this.grafo.getEdgeTarget(e), max));
+				
+			}	
+		}
+		
+		String res = "";
+		for(Adiacenza a : result) {
+			res += a.toString() + "\n";
+		}
+		return res;
 	} 
 	
 }
