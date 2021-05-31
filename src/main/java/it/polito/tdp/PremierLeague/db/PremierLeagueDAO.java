@@ -4,9 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import it.polito.tdp.PremierLeague.model.Action;
+import it.polito.tdp.PremierLeague.model.Adiacenza;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
 
@@ -86,6 +90,68 @@ public class PremierLeagueDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	public Map<Integer, Match> getVertici(Month mese, Map<Integer, Match> idMap){
+		
+		final String sql = "SELECT m.MatchID AS id, m.TeamHomeID AS th, m.TeamAwayID AS ta, m.TeamHomeFormation AS thf, m.TeamAwayFormation AS taf, m.ResultOfTeamHome AS roth, m.Date AS d "
+				+ "FROM matches m "
+				+ "WHERE MONTH(m.Date) = ?";
+		Connection conn = DBConnect.getConnection();
+		
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, mese.getValue());
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				if(!idMap.containsKey(res.getInt("id"))) {
+					Match match = new Match(res.getInt("id"), res.getInt("th"), res.getInt("ta"), res.getInt("thf"), 
+							res.getInt("taf"),res.getInt("roth"), res.getTimestamp("d").toLocalDateTime(), null, null);//, res.getString("t1.Name"),res.getString("t2.Name"));
+					idMap.put(res.getInt("id"), match);
+				}
+				
+			}
+			conn.close();
+			return idMap;
+			
+		} catch (SQLException e) {
+			throw new RuntimeException("Errore DB", e);
+		}
+		
+	}
+	
+	public List<Adiacenza> getArchi(Month m, Integer min, Map<Integer, Match> idMap){
+		final String sql = "SELECT m1.MatchID, m2.MatchID, COUNT(DISTINCT(a1.PlayerID)) AS peso "
+				+ "FROM matches m1, matches m2, actions a1, actions a2 "
+				+ "WHERE m1.MatchID = a1.MatchID AND m2.MatchID = a2.MatchID AND a1.TimePlayed >= ? AND a2.PlayerID >= ? "
+				+ "AND m1.MatchID > m2.MatchID AND MONTH(m1.Date) = MONTH(m2.Date) AND MONTH(m1.Date) = ? AND a1.PlayerID = a2.PlayerID "
+				+ "GROUP BY m1.MatchID, m2.MatchID "
+				+ "HAVING peso > 0";
+		
+		List<Adiacenza> result = new ArrayList<>();
+		Connection conn = DBConnect.getConnection();
+		
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, min);
+			st.setInt(2, min);
+			st.setInt(3, m.getValue());
+			ResultSet rs = st.executeQuery();
+			
+			while(rs.next()) {
+				if(idMap.containsKey(rs.getInt("m1.MatchID")) && idMap.containsKey(rs.getInt("m2.MatchID"))){
+					Adiacenza a = new Adiacenza(idMap.get(rs.getInt("m2.MatchID")), idMap.get(rs.getInt("m2.MatchID")), rs.getInt("peso"));
+					result.add(a);
+				}
+			}
+			
+			conn.close();
+			return result;
+			
+		}catch(SQLException e) {
+			throw new RuntimeException("Errore DB", e);
 		}
 	}
 	

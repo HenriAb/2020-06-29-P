@@ -5,6 +5,7 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -39,7 +40,7 @@ public class FXMLController {
     private TextField txtMinuti; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbMese"
-    private ComboBox<?> cmbMese; // Value injected by FXMLLoader
+    private ComboBox<Month> cmbMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbM1"
     private ComboBox<?> cmbM1; // Value injected by FXMLLoader
@@ -57,6 +58,34 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	Integer min;
+//    	Integer mese;
+//    	mese = this.cmbMese.getValue().getValue();
+    	Month mese = this.cmbMese.getValue();
+    	
+    	if(mese == null) {
+    		this.txtResult.setText("Errore! Selezionare il mese dal menù");
+    		return;
+    	}
+    	
+    	if(this.txtMinuti.getText() == null) {
+    		this.txtResult.setText("Errore, inserire il numero di minuti");
+    		return;
+    	}
+    	
+    	try {
+    		min = Integer.parseInt(this.txtMinuti.getText());
+    	}catch(NumberFormatException nfe) {
+    		this.txtResult.setText("Errore! Devi inserire un numero intero");
+    		return;
+    	}
+    	
+    	// se sono qua dovrei avere tutti i campi ok
+    	this.model.creaGrafo(mese, min);
+    	
+    	String message = String.format("Grafo creato\n#Vertici: %d\n#Archi: %d\n", this.model.nVertici(), this.model.nArchi());
+    	this.txtResult.appendText(message);
     	
     }
 
@@ -79,6 +108,10 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	for(int i=1; i<13; i++) {
+    		this.cmbMese.getItems().add(Month.of(i));
+    	}
   
     }
     
